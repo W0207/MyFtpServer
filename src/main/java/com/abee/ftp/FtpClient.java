@@ -13,6 +13,7 @@ import java.util.List;
 public class FtpClient {
 
     public static void main(String[] args) throws IOException, ClassNotFoundException {
+        testList();
     }
 
     public static void testRequest() throws IOException, ClassNotFoundException {
@@ -114,5 +115,49 @@ public class FtpClient {
 
         ResponseBody response5 = (ResponseBody) in.readObject();
         System.out.println(response1 + "\n" + response2 + "\n" + response3 + "\n" + response4 + "\n" + response5);
+    }
+
+    public static void testSizeAndMkd() throws IOException, ClassNotFoundException {
+        Socket socket = new Socket("localhost", 2221);
+        System.out.println("Connected: " + socket.isConnected());
+
+        ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+
+        /**
+         * Send commands.
+         */
+        InputStream input = socket.getInputStream();
+        ObjectInputStream in = new ObjectInputStream(input);
+
+        out.writeObject(new RequestBody(RequestCommand.PWD));
+        ResponseBody response1 = (ResponseBody) in.readObject();
+        out.writeObject(new RequestBody(RequestCommand.CWD, "D:/OTHER/test4cn/ftp"));
+        ResponseBody response2 = (ResponseBody) in.readObject();
+        out.writeObject(new RequestBody(RequestCommand.SIZE, "test3.jpeg"));
+        ResponseBody response3 = (ResponseBody) in.readObject();
+        out.writeObject(new RequestBody(RequestCommand.MKD, "test-mkd"));
+        ResponseBody response4 = (ResponseBody) in.readObject();
+        System.out.println(response1 + "\n" + response2 + "\n" + response3 + "\n" + response4);
+    }
+
+    public static void testList() throws IOException, ClassNotFoundException {
+        Socket socket = new Socket("localhost", 2221);
+        System.out.println("Connected: " + socket.isConnected());
+
+        ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+
+        /**
+         * Send commands.
+         */
+        InputStream input = socket.getInputStream();
+        ObjectInputStream in = new ObjectInputStream(input);
+
+        out.writeObject(new RequestBody(RequestCommand.PWD));
+        ResponseBody response1 = (ResponseBody) in.readObject();
+        out.writeObject(new RequestBody(RequestCommand.CWD, "D:/OTHER/test4cn/ftp"));
+        ResponseBody response2 = (ResponseBody) in.readObject();
+        out.writeObject(new RequestBody(RequestCommand.LIST));
+        ResponseBody response4 = (ResponseBody) in.readObject();
+        System.out.println(response1 + "\n" + response2 + "\n" + response4);
     }
 }

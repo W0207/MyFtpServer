@@ -13,7 +13,7 @@ public enum ResponseCode {
     _220(220, "Server ready for new users"),
 
     /**
-     * Response to command: PWD
+     * Response to command: PWD, MKD
      */
     _257(257, "Current dictionary"),
 

@@ -65,7 +65,7 @@ public class ServerCommandListener extends CommandListener {
 
         private Socket socket;
 
-        private String dictionary = ServerContext.root;
+        private String directory = ServerContext.root;
 
         private String serverMode = ServerContext.serverMode;
 
@@ -112,12 +112,12 @@ public class ServerCommandListener extends CommandListener {
             }
         }
 
-        public String getDictionary() {
-            return dictionary;
+        public String getDirectory() {
+            return directory;
         }
 
-        public void setDictionary(String dictionary) {
-            this.dictionary = dictionary;
+        public void setDirectory(String directory) {
+            this.directory = directory;
         }
 
         public String getServerMode() {

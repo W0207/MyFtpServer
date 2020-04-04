@@ -7,11 +7,11 @@ package com.abee.ftp.common.state;
  */
 public enum RequestCommand {
     /**
-     * Print working dictionary
+     * Print working directory
      */
     PWD,
     /**
-     * Change working dictionary
+     * Change working directory
      */
     CWD,
     /**
@@ -44,5 +44,10 @@ public enum RequestCommand {
     /**
      * Upload to server
      */
-    STOR;
+    STOR,
+
+    /**
+     * Generate directory
+     */
+    MKD;
 }
