@@ -3,7 +3,6 @@ package com.abee.ftp.common.listener;
 import com.abee.ftp.common.handler.CommandHandler;
 import com.abee.ftp.common.state.RequestBody;
 import com.abee.ftp.common.state.ResponseBody;
-import com.abee.ftp.common.tunnel.DataTunnel;
 import com.abee.ftp.config.ServerContext;
 
 import java.io.*;
@@ -72,7 +71,7 @@ public class ServerCommandListener extends CommandListener {
 
         private String transferMode = ServerContext.transferMode;
 
-        private DataTunnel dataTunnel;
+        private ServerSocket dataSocket;
 
         private InputStream in;
 
@@ -101,9 +100,6 @@ public class ServerCommandListener extends CommandListener {
                 try {
                     RequestBody request = (RequestBody) objectIn.readObject();
 
-                    /**
-                     * todo: Implement common operations.
-                     */
                     ResponseBody response = CommandHandler.process(request, this);
 
                     objectOut.writeObject(response);
@@ -138,14 +134,6 @@ public class ServerCommandListener extends CommandListener {
 
         public void setTransferMode(String transferMode) {
             this.transferMode = transferMode;
-        }
-
-        public DataTunnel getDataTunnel() {
-            return dataTunnel;
-        }
-
-        public void setDataTunnel(DataTunnel dataTunnel) {
-            this.dataTunnel = dataTunnel;
         }
 
         public OutputStream getOut() {
@@ -186,6 +174,14 @@ public class ServerCommandListener extends CommandListener {
 
         public void setObjectIn(ObjectInputStream objectIn) {
             this.objectIn = objectIn;
+        }
+
+        public ServerSocket getDataSocket() {
+            return dataSocket;
+        }
+
+        public void setDataSocket(ServerSocket dataSocket) {
+            this.dataSocket = dataSocket;
         }
     }
 }

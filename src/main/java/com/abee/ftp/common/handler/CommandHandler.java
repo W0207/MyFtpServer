@@ -2,9 +2,12 @@ package com.abee.ftp.common.handler;
 
 import com.abee.ftp.common.listener.ServerCommandListener;
 import com.abee.ftp.common.state.RequestBody;
+import com.abee.ftp.common.state.RequestCommand;
 import com.abee.ftp.common.state.ResponseBody;
 import com.abee.ftp.common.state.ResponseCode;
 import com.abee.ftp.common.tunnel.DataTunnel;
+import com.abee.ftp.common.tunnel.DownloadTunnel;
+import com.abee.ftp.common.tunnel.UploadTunnel;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,7 +43,9 @@ public class CommandHandler {
                 response = getFileSize(request, worker);
                 break;
             case RETR:
+            case STOR:
                 response = startTransfer(request, worker);
+                break;
             default:
         }
 
@@ -51,13 +56,25 @@ public class CommandHandler {
         /**
          * Set data tunnel context, ready to transfer.
          */
-
-        if (worker.getDataTunnel() != null) {
-            worker.getDataTunnel().setUri(request.getArg());
-            worker.getDataTunnel().start();
+        DataTunnel tunnel = null;
+        switch (request.getCommand()) {
+            case RETR:
+                tunnel = new DownloadTunnel(worker.getDataSocket(), worker.getObjectOut());
+                tunnel.setUri(request.getArg());
+                break;
+            case STOR:
+                tunnel = new UploadTunnel(worker.getDataSocket(), worker.getObjectOut());
+                tunnel.setUri(worker.getDictionary() + "/" + request.getArg());
+                break;
+            default:
         }
 
-        return new ResponseBody(ResponseCode._150, "Opening data connection.");
+        if (tunnel != null) {
+            tunnel.start();
+            return new ResponseBody(ResponseCode._150, "Opening data connection.");
+        } else {
+            return new ResponseBody(ResponseCode._500, "Failed.");
+        }
     }
 
     /**
@@ -90,10 +107,10 @@ public class CommandHandler {
         /**
          * Response directly if data tunnel already opened.
          */
-        if (worker.getDataTunnel() != null && !worker.getDataTunnel().getServerSocket().isClosed()) {
+        if (worker.getDataSocket() != null && !worker.getDataSocket().isClosed()) {
             return new ResponseBody(ResponseCode._227, "Entering passive mode.",
-                    worker.getDataTunnel().getServerSocket().getInetAddress().toString(),
-                    worker.getDataTunnel().getServerSocket().getLocalPort());
+                    worker.getDataSocket().getInetAddress().toString(),
+                    worker.getDataSocket().getLocalPort());
         }
 
         /**
@@ -107,12 +124,11 @@ public class CommandHandler {
             return new ResponseBody(ResponseCode._500, "No more port available.");
         }
 
-        DataTunnel dataTunnel = new DataTunnel(serverSocket, worker.getObjectOut());
-        worker.setDataTunnel(dataTunnel);
+        worker.setDataSocket(serverSocket);
 
         return new ResponseBody(ResponseCode._227, "Entering passive mode.",
-                worker.getDataTunnel().getServerSocket().getInetAddress().toString(),
-                worker.getDataTunnel().getServerSocket().getLocalPort());
+                serverSocket.getInetAddress().toString(),
+                serverSocket.getLocalPort());
     }
 
     /**

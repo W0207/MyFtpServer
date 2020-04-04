@@ -86,9 +86,6 @@ public class FileUtil {
                 if (fis != null) {
                     fis.close();
                 }
-                if (bis != null) {
-                    bis.close();
-                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -151,16 +148,18 @@ public class FileUtil {
 
     public static String write(byte[] result, String path) {
         OutputStream os = null;
+        BufferedOutputStream bos = null;
         try {
             os = new FileOutputStream(path);
-            os.write(result);
+            bos = new BufferedOutputStream(os);
+            bos.write(result);
             return "OK";
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
             try {
-                if (os != null) {
-                    os.close();
+                if (bos != null) {
+                    bos.close();
                 }
             } catch (IOException e) {
                 e.printStackTrace();

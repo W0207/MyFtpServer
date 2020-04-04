@@ -38,7 +38,11 @@ public enum RequestCommand {
      */
     SIZE,
     /**
-     * Start transferring
+     * Download from server
      */
-    RETR;
+    RETR,
+    /**
+     * Upload to server
+     */
+    STOR;
 }

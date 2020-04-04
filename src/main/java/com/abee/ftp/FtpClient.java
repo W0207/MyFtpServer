@@ -5,17 +5,41 @@ import com.abee.ftp.common.state.RequestCommand;
 import com.abee.ftp.common.state.ResponseBody;
 import com.abee.ftp.common.tool.FileUtil;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
 public class FtpClient {
 
-    public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException {
+    public static void main(String[] args) throws IOException, ClassNotFoundException {
+    }
+
+    public static void testRequest() throws IOException, ClassNotFoundException {
+        Socket socket = new Socket("localhost", 2221);
+        System.out.println("Connected: " + socket.isConnected());
+
+        ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+
+        ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+
+        out.writeObject(new RequestBody(RequestCommand.PWD));
+        ResponseBody response1 = (ResponseBody) in.readObject();
+        out.writeObject(new RequestBody(RequestCommand.CWD, "D:/OTHER/test4cn"));
+        ResponseBody response2 = (ResponseBody) in.readObject();
+        out.writeObject(new RequestBody(RequestCommand.PWD));
+        ResponseBody response3 = (ResponseBody) in.readObject();
+        out.writeObject(new RequestBody(RequestCommand.TYPE, "A"));
+        ResponseBody response4 = (ResponseBody) in.readObject();
+        out.writeObject(new RequestBody(RequestCommand.PASV));
+        ResponseBody response5 = (ResponseBody) in.readObject();
+
+        System.out.println(response1 + " " + response2 + " " + response3 + " " + response4 + " " + response5);
+
+        socket.close();
+    }
+
+    public static void testDownload() throws IOException, ClassNotFoundException {
         Socket socket = new Socket("localhost", 2221);
         System.out.println("Connected: " + socket.isConnected());
 
@@ -53,31 +77,42 @@ public class FtpClient {
         }
         FileUtil.write(result, "D:/OTHER/temp/test3.jpeg");
 
-        System.out.println(response1 + " " + response2 + " " + response3);
 
+        ResponseBody response4 = (ResponseBody) in.readObject();
+        System.out.println(response1 + "\n" + response2 + "\n" + response3 + "\n" + response4);
     }
 
-    public static void testRequest() throws IOException, ClassNotFoundException {
+    public static void testUpload() throws IOException, ClassNotFoundException {
         Socket socket = new Socket("localhost", 2221);
         System.out.println("Connected: " + socket.isConnected());
 
         ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
 
-        ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+        /**
+         * Send commands.
+         */
+        InputStream input = socket.getInputStream();
+        ObjectInputStream in = new ObjectInputStream(input);
 
         out.writeObject(new RequestBody(RequestCommand.PWD));
         ResponseBody response1 = (ResponseBody) in.readObject();
-        out.writeObject(new RequestBody(RequestCommand.CWD, "D:/OTHER/test4cn"));
+        out.writeObject(new RequestBody(RequestCommand.CWD, "D:/OTHER/test4cn/ftp"));
         ResponseBody response2 = (ResponseBody) in.readObject();
-        out.writeObject(new RequestBody(RequestCommand.PWD));
-        ResponseBody response3 = (ResponseBody) in.readObject();
-        out.writeObject(new RequestBody(RequestCommand.TYPE, "A"));
-        ResponseBody response4 = (ResponseBody) in.readObject();
         out.writeObject(new RequestBody(RequestCommand.PASV));
+        ResponseBody response3 = (ResponseBody) in.readObject();
+        out.writeObject(new RequestBody(RequestCommand.STOR, "test3.jpeg"));
+        ResponseBody response4 = (ResponseBody) in.readObject();
+
+        Socket dataSocket = new Socket("localhost", response3.getPassivePort());
+
+        OutputStream dataStream = dataSocket.getOutputStream();
+
+        File file = new File("D:/OTHER/temp/test3.jpeg");
+        byte[] buffer = FileUtil.read(file);
+        dataStream.write(buffer);
+        dataStream.close();
+
         ResponseBody response5 = (ResponseBody) in.readObject();
-
-        System.out.println(response1 + " " + response2 + " " + response3 + " " + response4 + " " + response5);
-
-        socket.close();
+        System.out.println(response1 + "\n" + response2 + "\n" + response3 + "\n" + response4 + "\n" + response5);
     }
 }
