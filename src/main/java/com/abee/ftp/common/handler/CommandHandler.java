@@ -155,9 +155,9 @@ public class CommandHandler {
         StringBuffer sb = new StringBuffer();
         for (File f: file.listFiles()) {
             if (f.isDirectory()) {
-                sb.append(f.getName()).append(":1\n");
+                sb.append(f.getName()).append(":1?");
             } else {
-                sb.append(f.getName()).append(":0\n");
+                sb.append(f.getName()).append(":0?");
             }
         }
         return new ResponseBody(ResponseCode._200, sb.toString());

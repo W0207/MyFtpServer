@@ -40,12 +40,17 @@ public class ResponseBody implements Serializable {
 
     @Override
     public String toString() {
-        return "ResponseBody{" +
-                "code=" + code +
-                ", arg='" + arg + '\'' +
-                ", passiveIpAddress='" + passiveIpAddress + '\'' +
-                ", passivePort='" + passivePort + '\'' +
-                '}';
+        StringBuffer sb = new StringBuffer();
+        sb.append("ResponseBody{").append("code=").append(code.getCode())
+                .append(", arg='").append(arg).append('\'');
+        if (passiveIpAddress != null) {
+            sb.append(", passiveIpAddress='").append(passiveIpAddress).append('\'');
+        }
+        if (passivePort != 0) {
+            sb.append(", passivePort=").append(passivePort);
+        }
+        sb.append('}');
+        return sb.toString();
     }
 
     public ResponseCode getCode() {
