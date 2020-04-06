@@ -9,11 +9,28 @@ import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class FtpClient {
 
     public static void main(String[] args) throws IOException, ClassNotFoundException {
-        testList();
+        for (int i = 0; i < 10; i++) {
+            new Thread(
+                    new Runnable() {
+                        private int i = new Random().nextInt(10);
+                        @Override
+                        public void run() {
+                            try {
+                                testUpload("D:/OTHER/temp/" + i + ".txt",  "tar.txt");
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            } catch (ClassNotFoundException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+            ).start();
+        }
     }
 
     public static void testRequest() throws IOException, ClassNotFoundException {
@@ -83,7 +100,7 @@ public class FtpClient {
         System.out.println(response1 + "\n" + response2 + "\n" + response3 + "\n" + response4);
     }
 
-    public static void testUpload() throws IOException, ClassNotFoundException {
+    public static void testUpload(String src, String tar) throws IOException, ClassNotFoundException {
         Socket socket = new Socket("localhost", 2221);
         System.out.println("Connected: " + socket.isConnected());
 
@@ -101,14 +118,14 @@ public class FtpClient {
         ResponseBody response2 = (ResponseBody) in.readObject();
         out.writeObject(new RequestBody(RequestCommand.PASV));
         ResponseBody response3 = (ResponseBody) in.readObject();
-        out.writeObject(new RequestBody(RequestCommand.STOR, "test3.jpeg"));
+        out.writeObject(new RequestBody(RequestCommand.STOR, tar));
         ResponseBody response4 = (ResponseBody) in.readObject();
 
         Socket dataSocket = new Socket("localhost", response3.getPassivePort());
 
         OutputStream dataStream = dataSocket.getOutputStream();
 
-        File file = new File("D:/OTHER/temp/test3.jpeg");
+        File file = new File(src);
         byte[] buffer = FileUtil.read(file);
         dataStream.write(buffer);
         dataStream.close();

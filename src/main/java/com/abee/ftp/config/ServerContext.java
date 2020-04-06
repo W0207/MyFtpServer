@@ -10,6 +10,8 @@ public class ServerContext {
      */
     public static final String root = "D:/OTHER/test4cn/ftp";
 
+    public static final String history = "D:/OTHER/test4cn/ftp";
+
     public static final String transferMode = "I";
 
     public static final String serverMode = "PASV";

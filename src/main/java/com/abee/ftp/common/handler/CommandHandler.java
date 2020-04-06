@@ -11,6 +11,7 @@ import com.abee.ftp.common.tunnel.UploadTunnel;
 import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.Objects;
 
 /**
  * @author xincong yao
@@ -152,8 +153,8 @@ public class CommandHandler {
 
     private static ResponseBody transferFileList(ServerCommandListener.Worker worker) {
         File file = new File(worker.getDirectory());
-        StringBuffer sb = new StringBuffer();
-        for (File f: file.listFiles()) {
+        StringBuilder sb = new StringBuilder();
+        for (File f: Objects.requireNonNull(file.listFiles())) {
             if (f.isDirectory()) {
                 sb.append(f.getName()).append(":1?");
             } else {

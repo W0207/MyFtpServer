@@ -8,6 +8,7 @@ import com.abee.ftp.config.ServerContext;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 /**
  * @author xincong yao
@@ -16,8 +17,8 @@ public class ServerCommandListener extends CommandListener {
 
     public boolean start = true;
 
-    public ServerCommandListener(int port) {
-        super.init("localhost", port);
+    public ServerCommandListener(String hostname, int port) throws UnknownHostException {
+        super.init(hostname, port);
     }
 
     @Override
@@ -32,7 +33,7 @@ public class ServerCommandListener extends CommandListener {
 
         ServerSocket serverSocket = null;
         try {
-            serverSocket = new ServerSocket(socketAddress.getPort());
+            serverSocket = new ServerSocket(socketAddress.getPort(), 50, socketAddress.getAddress());
             System.out.println("FTP Server started. IP: " + socketAddress.getAddress()
                     + ", Listener Port: " + socketAddress.getPort());
         } catch (IOException e) {

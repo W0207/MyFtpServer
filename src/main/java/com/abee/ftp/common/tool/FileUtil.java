@@ -1,54 +1,69 @@
 package com.abee.ftp.common.tool;
 
-import org.springframework.stereotype.Component;
+import com.abee.ftp.common.state.ResponseBody;
+import com.abee.ftp.common.state.ResponseCode;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
+import java.nio.channels.OverlappingFileLockException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class FileUtil {
 
-    public void toBrowser(HttpServletResponse response, String filename){
-        if (filename != null) {
-            File file = new File(filename);
-            if (file.exists()) {
-                response.setContentType("application/force-download");
-                response.addHeader("Content-Disposition", "attachment;filename=" + filename);
-                byte[] buffer = new byte[1024];
-                FileInputStream fis = null;
-                BufferedInputStream bis = null;
-                try {
-                    fis = new FileInputStream(file);
-                    bis = new BufferedInputStream(fis);
-                    OutputStream os = response.getOutputStream();
+    public static boolean write(byte[] result, String path) {
+        FileChannel channel = null;
+        FileLock lock = null;
+        ByteBuffer buffer = ByteBuffer.wrap(result);
 
-                    int len;
-                    while ((len = bis.read(buffer)) != -1) {
-                        os.write(buffer, 0, len);
-                        os.flush();
-                    }
-                } catch (Exception e) {
+        try {
+            channel = new FileOutputStream(path).getChannel();
+
+            /**
+             * Try to get file lock every 0 ~ 60ms, it will try 3 times.
+             */
+            int times = 0;
+            while (times < 3 && lock == null) {
+                try {
+                    lock = channel.tryLock();
+                    clean(path);
+                } catch (OverlappingFileLockException e) {
+                    times++;
+                    Thread.sleep(new Random().nextInt(60));
+                }
+            }
+            if (lock == null) {
+                return false;
+            }
+
+            channel.write(buffer);
+            return true;
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            if (lock != null) {
+                try {
+                    lock.release();
+                } catch (IOException e) {
                     e.printStackTrace();
-                } finally {
-                    if (bis != null) {
-                        try {
-                            bis.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    if (fis != null) {
-                        try {
-                            fis.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
+                }
+            }
+
+            if (channel != null) {
+                try {
+                    channel.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
         }
+
+        return false;
     }
 
     public static byte[] read(File file){
@@ -92,6 +107,63 @@ public class FileUtil {
         }
 
         return null;
+    }
+
+    public static boolean clean(String path) throws IOException {
+        File file = new File(path);
+        FileWriter writer = new FileWriter(file);
+        writer.write("");
+        writer.close();
+        return true;
+    }
+
+    public boolean delete(String path){
+        File file = new File(path);
+        if(file.exists()){
+            return file.delete();
+        }
+        return false;
+    }
+
+    public void toBrowser(HttpServletResponse response, String filename){
+        if (filename != null) {
+            File file = new File(filename);
+            if (file.exists()) {
+                response.setContentType("application/force-download");
+                response.addHeader("Content-Disposition", "attachment;filename=" + filename);
+                byte[] buffer = new byte[1024];
+                FileInputStream fis = null;
+                BufferedInputStream bis = null;
+                try {
+                    fis = new FileInputStream(file);
+                    bis = new BufferedInputStream(fis);
+                    OutputStream os = response.getOutputStream();
+
+                    int len;
+                    while ((len = bis.read(buffer)) != -1) {
+                        os.write(buffer, 0, len);
+                        os.flush();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    if (bis != null) {
+                        try {
+                            bis.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    if (fis != null) {
+                        try {
+                            fis.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public void toLocal(File file, String path){
@@ -144,35 +216,5 @@ public class FileUtil {
             e.printStackTrace();
         }
         return f;
-    }
-
-    public static String write(byte[] result, String path) {
-        OutputStream os = null;
-        BufferedOutputStream bos = null;
-        try {
-            os = new FileOutputStream(path);
-            bos = new BufferedOutputStream(os);
-            bos.write(result);
-            return "OK";
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (bos != null) {
-                    bos.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return "ERROR";
-    }
-
-    public void delete(String path){
-        File file = new File(path);
-        if(file.exists()){
-            file.delete();
-        }
     }
 }
