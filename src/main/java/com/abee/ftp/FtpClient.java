@@ -9,28 +9,28 @@ import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class FtpClient {
 
     public static void main(String[] args) throws IOException, ClassNotFoundException {
-        for (int i = 0; i < 10; i++) {
-            new Thread(
-                    new Runnable() {
-                        private int i = new Random().nextInt(10);
-                        @Override
-                        public void run() {
-                            try {
-                                testUpload("D:/OTHER/temp/" + i + ".txt",  "tar.txt");
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            } catch (ClassNotFoundException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-            ).start();
-        }
+//        for (int i = 0; i < 10; i++) {
+//            new Thread(
+//                    new Runnable() {
+//                        private int i = new Random().nextInt(10);
+//                        @Override
+//                        public void run() {
+//                            try {
+//                                testUpload("D:/OTHER/temp/" + i + ".txt",  "tar.txt");
+//                            } catch (IOException e) {
+//                                e.printStackTrace();
+//                            } catch (ClassNotFoundException e) {
+//                                e.printStackTrace();
+//                            }
+//                        }
+//                    }
+//            ).start();
+//        }
+        testDownload();
     }
 
     public static void testRequest() throws IOException, ClassNotFoundException {
@@ -70,7 +70,7 @@ public class FtpClient {
         ResponseBody response1 = (ResponseBody) in.readObject();
         out.writeObject(new RequestBody(RequestCommand.PASV));
         ResponseBody response2 = (ResponseBody) in.readObject();
-        out.writeObject(new RequestBody(RequestCommand.RETR, "D:/OTHER/test4cn/ftp/test3.jpeg"));
+        out.writeObject(new RequestBody(RequestCommand.RETR, "test3.jpeg"));
         ResponseBody response3 = (ResponseBody) in.readObject();
 
         Socket dataSocket = new Socket("localhost", response2.getPassivePort());

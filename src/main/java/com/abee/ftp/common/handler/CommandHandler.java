@@ -76,16 +76,15 @@ public class CommandHandler {
         switch (request.getCommand()) {
             case RETR:
                 tunnel = new DownloadTunnel(worker.getDataSocket(), worker.getObjectOut());
-                tunnel.setUri(request.getArg());
                 break;
             case STOR:
                 tunnel = new UploadTunnel(worker.getDataSocket(), worker.getObjectOut());
-                tunnel.setUri(worker.getDirectory() + "/" + request.getArg());
                 break;
             default:
         }
 
         if (tunnel != null) {
+            tunnel.setUri(worker.getDirectory() + "/" + request.getArg());
             tunnel.start();
             return new ResponseBody(ResponseCode._150, "Opening data connection.");
         } else {
