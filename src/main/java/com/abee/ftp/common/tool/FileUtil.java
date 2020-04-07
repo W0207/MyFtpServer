@@ -16,6 +16,19 @@ import java.util.Random;
 
 public class FileUtil {
 
+    public static boolean clean(String path) throws IOException {
+        File file = new File(path);
+        return clean(file);
+    }
+
+    public static boolean clean(File file) throws IOException {
+
+        FileWriter writer = new FileWriter(file);
+        writer.write("");
+        writer.close();
+        return true;
+    }
+
     public static boolean write(byte[] result, String path) {
         FileChannel channel = null;
         FileLock lock = null;
@@ -66,7 +79,7 @@ public class FileUtil {
         return false;
     }
 
-    public static byte[] read(File file){
+    private static byte[] read(File file){
         FileInputStream fis = null;
         BufferedInputStream bis = null;
 
@@ -107,14 +120,6 @@ public class FileUtil {
         }
 
         return null;
-    }
-
-    public static boolean clean(String path) throws IOException {
-        File file = new File(path);
-        FileWriter writer = new FileWriter(file);
-        writer.write("");
-        writer.close();
-        return true;
     }
 
     public boolean delete(String path){

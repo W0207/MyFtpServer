@@ -3,12 +3,10 @@ package com.abee.ftp.common.tunnel;
 
 import com.abee.ftp.common.state.ResponseBody;
 import com.abee.ftp.common.state.ResponseCode;
+import com.abee.ftp.common.tool.FileTransferUtil;
 import com.abee.ftp.common.tool.FileUtil;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.SocketException;
 
@@ -44,23 +42,16 @@ public class DownloadTunnel extends DataTunnel {
         /**
          * Download.
          */
-        byte[] data = FileUtil.read(new File(uri));
-
-        OutputStream out = null;
         try {
-            out = client.getOutputStream();
-            out.write(data);
-            notification.writeObject(new ResponseBody(ResponseCode._226, ResponseCode._226.description));
+            File file = new File(uri);
+            OutputStream out = client.getOutputStream();
+            if (FileTransferUtil.file2Stream(out, file)) {
+                notification.writeObject(new ResponseBody(ResponseCode._226, ResponseCode._226.description));
+            } else {
+                notification.writeObject(new ResponseBody(ResponseCode._500, "Transfer failed."));
+            }
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            if (out != null) {
-                try {
-                    out.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
         }
     }
 }
