@@ -10,15 +10,16 @@ import java.io.ObjectOutputStream;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * @author xincong yao
+ */
 public class AdvancedOperationSet extends BasicOperationSet {
 
     public AdvancedOperationSet(ObjectOutputStream out, ObjectInputStream in) {
         super(out, in);
     }
 
-    /**
-     * @param file Local file, which could be a folder or a common file.
-     */
+    @Override
     public boolean uploads(File file) throws IOException, ClassNotFoundException {
         if (file.isDirectory()) {
             for (File f: Objects.requireNonNull(file.listFiles())) {
@@ -52,10 +53,7 @@ public class AdvancedOperationSet extends BasicOperationSet {
         return true;
     }
 
-    /**
-     * @param file    Local file to store remote file.
-     * @param remote  Remote directory of target file.
-     */
+    @Override
     public boolean downloads(File file, String remote) throws IOException, ClassNotFoundException {
         /**
          * if change working directory operation success
@@ -100,4 +98,5 @@ public class AdvancedOperationSet extends BasicOperationSet {
 
         return true;
     }
+
 }

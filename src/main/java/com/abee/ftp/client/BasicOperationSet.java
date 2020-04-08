@@ -9,12 +9,11 @@ import java.io.*;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * @author xincong yao
  */
-public class BasicOperationSet {
+public abstract class BasicOperationSet {
     /**
      * To send requests.
      */
@@ -85,7 +84,7 @@ public class BasicOperationSet {
     }
 
     /**
-     * Upload common file.
+     * Upload single file.
      */
     public ResponseBody upload(File file, int port) throws IOException, ClassNotFoundException {
         Socket dataSocket = new Socket("localhost", port);
@@ -95,7 +94,7 @@ public class BasicOperationSet {
     }
 
     /**
-     * Download common file.
+     * Download single file.
      */
     public ResponseBody download(File file, int port) throws IOException, ClassNotFoundException {
         Socket dataSocket = new Socket("localhost", port);
@@ -103,4 +102,21 @@ public class BasicOperationSet {
         FileTransferUtil.stream2File(dataStream, file);
         return (ResponseBody) in.readObject();
     }
+
+    /**
+     * Upload all files under {@code file} to server if {@code file.isDirectory()} is true
+     * Upload itself if {@code file.isFile()} is true.
+     * @param file local directory or common file.
+     * @return whether upload success or fail.
+     */
+    public abstract boolean uploads(File file) throws IOException, ClassNotFoundException;
+
+    /**
+     * Download all files under the file to server if {@code remote} is working directory.
+     * Download itself if {@code file.isFile()} is uri.
+     * @param file local directory, {@code file.isDirectory()} is always true.
+     * @param remote server working directory or uri.
+     * @return whether download success or fail.
+     */
+    public abstract boolean downloads(File file, String remote) throws IOException, ClassNotFoundException;
 }
