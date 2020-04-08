@@ -107,7 +107,7 @@ public class ServerCommandListener extends CommandListener {
                 } catch (Exception e) {
                     System.out.println("Client disconnect." +
                             " IP: " + socket.getInetAddress()
-                            + ", " + socket.getPort());
+                            + ", Port: " + socket.getPort());
                     break;
                 }
             }

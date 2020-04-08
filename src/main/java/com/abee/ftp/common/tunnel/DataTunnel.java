@@ -1,13 +1,8 @@
 package com.abee.ftp.common.tunnel;
 
-import com.abee.ftp.common.state.ResponseBody;
-import com.abee.ftp.common.state.ResponseCode;
-import com.abee.ftp.common.tool.FileUtil;
-
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 
 /**
  * @author xincong yao
@@ -17,15 +12,15 @@ public abstract class DataTunnel extends Thread {
     /**
      * To notified worker thread whether data transferring is done.
      */
-    public ObjectOutputStream notification;
+    ObjectOutputStream notification;
 
-    public ServerSocket serverSocket;
+    ServerSocket serverSocket;
 
-    public Socket client;
+    Socket client;
 
-    public String uri;
+    String uri;
 
-    public DataTunnel(ServerSocket serverSocket, ObjectOutputStream notification) {
+    DataTunnel(ServerSocket serverSocket, ObjectOutputStream notification) {
         this.serverSocket = serverSocket;
         this.notification = notification;
     }
