@@ -1,14 +1,134 @@
 package com.abee.ftp.common.tool;
 
-import org.springframework.stereotype.Component;
+import com.abee.ftp.common.state.ResponseBody;
+import com.abee.ftp.common.state.ResponseCode;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
+import java.nio.channels.OverlappingFileLockException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class FileUtil {
+
+    public static boolean clean(String path) throws IOException {
+        File file = new File(path);
+        return clean(file);
+    }
+
+    public static boolean clean(File file) throws IOException {
+
+        FileWriter writer = new FileWriter(file);
+        writer.write("");
+        writer.close();
+        return true;
+    }
+
+    public static boolean write(byte[] result, String path) {
+        FileChannel channel = null;
+        FileLock lock = null;
+        ByteBuffer buffer = ByteBuffer.wrap(result);
+
+        try {
+            channel = new FileOutputStream(path).getChannel();
+
+            /**
+             * Try to get file lock every 0 ~ 60ms, it will try 3 times.
+             */
+            int times = 0;
+            while (times < 3 && lock == null) {
+                try {
+                    lock = channel.tryLock();
+                    clean(path);
+                } catch (OverlappingFileLockException e) {
+                    times++;
+                    Thread.sleep(new Random().nextInt(60));
+                }
+            }
+            if (lock == null) {
+                return false;
+            }
+
+            channel.write(buffer);
+            return true;
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            if (lock != null) {
+                try {
+                    lock.release();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (channel != null) {
+                try {
+                    channel.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static byte[] read(File file){
+        FileInputStream fis = null;
+        BufferedInputStream bis = null;
+
+        try {
+            fis = new FileInputStream(file);
+            bis = new BufferedInputStream(fis);
+
+            byte[] buffer = new byte[4096];
+            List<byte[]> batches = new ArrayList<>();
+
+            int len;
+            int totalLen = 0;
+            while ((len = bis.read(buffer)) != -1) {
+                byte[] t = new byte[len];
+                System.arraycopy(buffer, 0, t, 0, len);
+                batches.add(t);
+                totalLen += len;
+            }
+
+            len = 0;
+            byte[] result = new byte[totalLen];
+            for (byte[] data: batches) {
+                System.arraycopy(data, 0, result, len, data.length);
+                len += data.length;
+            }
+            return result;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (fis != null) {
+                    fis.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return null;
+    }
+
+    public boolean delete(String path){
+        File file = new File(path);
+        if(file.exists()){
+            return file.delete();
+        }
+        return false;
+    }
 
     public void toBrowser(HttpServletResponse response, String filename){
         if (filename != null) {
@@ -49,52 +169,6 @@ public class FileUtil {
                 }
             }
         }
-    }
-
-    public static byte[] read(File file){
-        FileInputStream fis = null;
-        BufferedInputStream bis = null;
-
-        try {
-            fis = new FileInputStream(file);
-            bis = new BufferedInputStream(fis);
-
-            byte[] buffer = new byte[4096];
-            List<byte[]> batches = new ArrayList<>();
-
-            int len;
-            int totalLen = 0;
-            while ((len = bis.read(buffer)) != -1) {
-                byte[] t = new byte[len];
-                System.arraycopy(buffer, 0, t, 0, len);
-                batches.add(t);
-                totalLen += len;
-            }
-
-            len = 0;
-            byte[] result = new byte[totalLen];
-            for (byte[] data: batches) {
-                System.arraycopy(data, 0, result, len, data.length);
-                len += data.length;
-            }
-            return result;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (fis != null) {
-                    fis.close();
-                }
-                if (bis != null) {
-                    bis.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return null;
     }
 
     public void toLocal(File file, String path){
@@ -147,33 +221,5 @@ public class FileUtil {
             e.printStackTrace();
         }
         return f;
-    }
-
-    public static String write(byte[] result, String path) {
-        OutputStream os = null;
-        try {
-            os = new FileOutputStream(path);
-            os.write(result);
-            return "OK";
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (os != null) {
-                    os.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return "ERROR";
-    }
-
-    public void delete(String path){
-        File file = new File(path);
-        if(file.exists()){
-            file.delete();
-        }
     }
 }

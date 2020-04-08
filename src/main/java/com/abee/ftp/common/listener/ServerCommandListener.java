@@ -3,12 +3,12 @@ package com.abee.ftp.common.listener;
 import com.abee.ftp.common.handler.CommandHandler;
 import com.abee.ftp.common.state.RequestBody;
 import com.abee.ftp.common.state.ResponseBody;
-import com.abee.ftp.common.tunnel.DataTunnel;
 import com.abee.ftp.config.ServerContext;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 /**
  * @author xincong yao
@@ -17,8 +17,8 @@ public class ServerCommandListener extends CommandListener {
 
     public boolean start = true;
 
-    public ServerCommandListener(int port) {
-        super.init("localhost", port);
+    public ServerCommandListener(String hostname, int port) throws UnknownHostException {
+        super.init(hostname, port);
     }
 
     @Override
@@ -33,7 +33,7 @@ public class ServerCommandListener extends CommandListener {
 
         ServerSocket serverSocket = null;
         try {
-            serverSocket = new ServerSocket(socketAddress.getPort());
+            serverSocket = new ServerSocket(socketAddress.getPort(), 50, socketAddress.getAddress());
             System.out.println("FTP Server started. IP: " + socketAddress.getAddress()
                     + ", Listener Port: " + socketAddress.getPort());
         } catch (IOException e) {
@@ -66,13 +66,13 @@ public class ServerCommandListener extends CommandListener {
 
         private Socket socket;
 
-        private String dictionary = ServerContext.root;
+        private String directory = ServerContext.root;
 
         private String serverMode = ServerContext.serverMode;
 
         private String transferMode = ServerContext.transferMode;
 
-        private DataTunnel dataTunnel;
+        private ServerSocket dataSocket;
 
         private InputStream in;
 
@@ -101,27 +101,24 @@ public class ServerCommandListener extends CommandListener {
                 try {
                     RequestBody request = (RequestBody) objectIn.readObject();
 
-                    /**
-                     * todo: Implement common operations.
-                     */
                     ResponseBody response = CommandHandler.process(request, this);
 
                     objectOut.writeObject(response);
                 } catch (Exception e) {
                     System.out.println("Client disconnect." +
                             " IP: " + socket.getInetAddress()
-                            + ", " + socket.getPort());
+                            + ", Port: " + socket.getPort());
                     break;
                 }
             }
         }
 
-        public String getDictionary() {
-            return dictionary;
+        public String getDirectory() {
+            return directory;
         }
 
-        public void setDictionary(String dictionary) {
-            this.dictionary = dictionary;
+        public void setDirectory(String directory) {
+            this.directory = directory;
         }
 
         public String getServerMode() {
@@ -138,14 +135,6 @@ public class ServerCommandListener extends CommandListener {
 
         public void setTransferMode(String transferMode) {
             this.transferMode = transferMode;
-        }
-
-        public DataTunnel getDataTunnel() {
-            return dataTunnel;
-        }
-
-        public void setDataTunnel(DataTunnel dataTunnel) {
-            this.dataTunnel = dataTunnel;
         }
 
         public OutputStream getOut() {
@@ -186,6 +175,14 @@ public class ServerCommandListener extends CommandListener {
 
         public void setObjectIn(ObjectInputStream objectIn) {
             this.objectIn = objectIn;
+        }
+
+        public ServerSocket getDataSocket() {
+            return dataSocket;
+        }
+
+        public void setDataSocket(ServerSocket dataSocket) {
+            this.dataSocket = dataSocket;
         }
     }
 }

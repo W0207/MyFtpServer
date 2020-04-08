@@ -5,10 +5,13 @@ import com.abee.ftp.common.state.RequestBody;
 import com.abee.ftp.common.state.ResponseBody;
 import com.abee.ftp.common.state.ResponseCode;
 import com.abee.ftp.common.tunnel.DataTunnel;
+import com.abee.ftp.common.tunnel.DownloadTunnel;
+import com.abee.ftp.common.tunnel.UploadTunnel;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.Objects;
 
 /**
  * @author xincong yao
@@ -19,13 +22,13 @@ public class CommandHandler {
         ResponseBody response = null;
         switch (request.getCommand()) {
             case PWD:
-                response = printWorkDictionary(request, worker);
+                response = printWorkDirectory(worker);
                 break;
             case CWD:
-                response = changeWorkDictionary(request, worker);
+                response = changeWorkDirectory(request, worker);
                 break;
             case LIST:
-                response = transferFileList(request, worker);
+                response = transferFileList(worker);
                 break;
             case PASV:
                 response = turnToPassiveMode(worker);
@@ -40,31 +43,64 @@ public class CommandHandler {
                 response = getFileSize(request, worker);
                 break;
             case RETR:
+            case STOR:
                 response = startTransfer(request, worker);
+                break;
+            case MKD:
+                response = makeDirectory(request, worker);
             default:
         }
 
         return response;
     }
 
+    private static ResponseBody makeDirectory(RequestBody request, ServerCommandListener.Worker worker) {
+        String pathname = worker.getDirectory() + "/" + request.getArg();
+        File file = new File(pathname);
+        if (!file.exists()) {
+            if (file.mkdir()) {
+                return new ResponseBody(ResponseCode._257, pathname + " Directory created.");
+            } else {
+                return new ResponseBody(ResponseCode._500, pathname + " illegal.");
+            }
+        } else {
+            return new ResponseBody(ResponseCode._257, pathname + " already exists.");
+        }
+    }
+
     private static ResponseBody startTransfer(RequestBody request, ServerCommandListener.Worker worker) {
         /**
          * Set data tunnel context, ready to transfer.
          */
-
-        if (worker.getDataTunnel() != null) {
-            worker.getDataTunnel().setUri(request.getArg());
-            worker.getDataTunnel().start();
+        DataTunnel tunnel = null;
+        switch (request.getCommand()) {
+            case RETR:
+                tunnel = new DownloadTunnel(worker.getDataSocket(), worker.getObjectOut());
+                break;
+            case STOR:
+                tunnel = new UploadTunnel(worker.getDataSocket(), worker.getObjectOut());
+                break;
+            default:
         }
 
-        return new ResponseBody(ResponseCode._150, "Opening data connection.");
+        if (tunnel != null) {
+            tunnel.setUri(worker.getDirectory() + "/" + request.getArg());
+            tunnel.start();
+            return new ResponseBody(ResponseCode._150, "Opening data connection.");
+        } else {
+            return new ResponseBody(ResponseCode._500, "Failed.");
+        }
     }
 
-    /**
-     * todo: Implement getFileSize function.
-     */
     private static ResponseBody getFileSize(RequestBody request, ServerCommandListener.Worker worker) {
-        return null;
+        String pathname = worker.getDirectory() + "/" + request.getArg();
+        File file = new File(pathname);
+        if (file.exists() && file.isFile()) {
+            return new ResponseBody(ResponseCode._213, String.valueOf(file.length()));
+        } else {
+            return new ResponseBody(ResponseCode._500, pathname + " not exists.");
+        }
+
     }
 
     private static ResponseBody changeTransferType(RequestBody request, ServerCommandListener.Worker worker) {
@@ -90,10 +126,10 @@ public class CommandHandler {
         /**
          * Response directly if data tunnel already opened.
          */
-        if (worker.getDataTunnel() != null && !worker.getDataTunnel().getServerSocket().isClosed()) {
+        if (worker.getDataSocket() != null && !worker.getDataSocket().isClosed()) {
             return new ResponseBody(ResponseCode._227, "Entering passive mode.",
-                    worker.getDataTunnel().getServerSocket().getInetAddress().toString(),
-                    worker.getDataTunnel().getServerSocket().getLocalPort());
+                    worker.getDataSocket().getInetAddress().toString(),
+                    worker.getDataSocket().getLocalPort());
         }
 
         /**
@@ -107,38 +143,43 @@ public class CommandHandler {
             return new ResponseBody(ResponseCode._500, "No more port available.");
         }
 
-        DataTunnel dataTunnel = new DataTunnel(serverSocket, worker.getObjectOut());
-        worker.setDataTunnel(dataTunnel);
+        worker.setDataSocket(serverSocket);
 
         return new ResponseBody(ResponseCode._227, "Entering passive mode.",
-                worker.getDataTunnel().getServerSocket().getInetAddress().toString(),
-                worker.getDataTunnel().getServerSocket().getLocalPort());
+                serverSocket.getInetAddress().toString(),
+                serverSocket.getLocalPort());
     }
 
-    /**
-     * todo: Implement transferFileList function.
-     */
-    private static ResponseBody transferFileList(RequestBody request, ServerCommandListener.Worker worker) {
-        return null;
+    private static ResponseBody transferFileList(ServerCommandListener.Worker worker) {
+        File file = new File(worker.getDirectory());
+        StringBuilder sb = new StringBuilder();
+        for (File f: Objects.requireNonNull(file.listFiles())) {
+            if (f.isDirectory()) {
+                sb.append(f.getName()).append(":1?");
+            } else {
+                sb.append(f.getName()).append(":0?");
+            }
+        }
+        return new ResponseBody(ResponseCode._200, sb.toString());
     }
 
-    private static ResponseBody changeWorkDictionary(RequestBody request, ServerCommandListener.Worker worker) {
+    private static ResponseBody changeWorkDirectory(RequestBody request, ServerCommandListener.Worker worker) {
         ResponseBody response;
 
         File file = new File(request.getArg());
         if (file.isDirectory()) {
-            worker.setDictionary(request.getArg());
-            response = new ResponseBody(ResponseCode._250, "Dictionary changed to " + request.getArg() + ".");
+            worker.setDirectory(request.getArg());
+            response = new ResponseBody(ResponseCode._250, "Directory changed to " + request.getArg() + ".");
 
         } else {
-            response = new ResponseBody(ResponseCode._500, "Dictionary " + request.getArg() + " not exist.");
+            response = new ResponseBody(ResponseCode._500, "Directory " + request.getArg() + " not exist.");
         }
 
         return response;
     }
 
-    private static ResponseBody printWorkDictionary(RequestBody request, ServerCommandListener.Worker worker) {
-        ResponseBody response = new ResponseBody(ResponseCode._257, worker.getDictionary());
+    private static ResponseBody printWorkDirectory(ServerCommandListener.Worker worker) {
+        ResponseBody response = new ResponseBody(ResponseCode._257, worker.getDirectory());
         return response;
     }
 
