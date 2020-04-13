@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class FtpApplication {
+public class FtpServerApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(FtpApplication.class, args);
+        SpringApplication.run(FtpServerApplication.class, args);
     }
 
 }

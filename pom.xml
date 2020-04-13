@@ -9,16 +9,21 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.abee</groupId>
-    <artifactId>ftp</artifactId>
+    <artifactId>ftp-server</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>ftp</name>
-    <description>A Project of Ftp</description>
+    <name>ftp-server</name>
+    <description>A Project of FtpServer</description>
 
     <properties>
         <java.version>1.8</java.version>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
