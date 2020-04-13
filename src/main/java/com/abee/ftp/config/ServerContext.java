@@ -8,9 +8,9 @@ public class ServerContext {
     /**
      * Consider to read from xml file.
      */
-    public static final String root = "D:/OTHER/test4cn/ftp";
+    public static final String root = "/";
 
-    public static final String history = "D:/OTHER/test4cn/ftp";
+    public static final String history = "/";
 
     public static final String transferMode = "I";
 

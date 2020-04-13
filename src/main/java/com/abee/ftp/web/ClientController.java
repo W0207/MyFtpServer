@@ -14,7 +14,7 @@ import java.io.IOException;
 @RequestMapping("client")
 public class ClientController {
 
-    MyFtpClient client;
+    private MyFtpClient client;
 
     @RequestMapping
     public ModelAndView index() {
