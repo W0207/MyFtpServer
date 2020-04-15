@@ -4,7 +4,6 @@ package com.abee.ftp.common.tunnel;
 import com.abee.ftp.common.state.ResponseBody;
 import com.abee.ftp.common.state.ResponseCode;
 import com.abee.ftp.common.tool.FileTransferUtil;
-import com.abee.ftp.common.tool.FileUtil;
 
 import java.io.*;
 import java.net.ServerSocket;
