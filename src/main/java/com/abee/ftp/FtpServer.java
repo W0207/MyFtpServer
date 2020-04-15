@@ -2,6 +2,7 @@ package com.abee.ftp;
 
 
 import com.abee.ftp.common.listener.ServerCommandListener;
+import com.abee.ftp.config.ServerContext;
 import com.abee.ftp.server.MyFtpServer;
 
 import java.net.UnknownHostException;
@@ -16,6 +17,8 @@ public class FtpServer {
 
         ServerCommandListener serverCommandListener = new ServerCommandListener("localhost", 2221);
         server.setCommandListener(serverCommandListener);
+
+        server.setRoot("D:/server");
 
         server.start();
     }

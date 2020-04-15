@@ -66,11 +66,11 @@ public class ServerCommandListener extends CommandListener {
 
         private Socket socket;
 
-        private String directory = ServerContext.root;
+        private String directory = ServerContext.getRoot();
 
-        private String serverMode = ServerContext.serverMode;
+        private String serverMode = ServerContext.getServerMode();
 
-        private String transferMode = ServerContext.transferMode;
+        private String transferMode = ServerContext.getTransferMode();
 
         private ServerSocket dataSocket;
 
