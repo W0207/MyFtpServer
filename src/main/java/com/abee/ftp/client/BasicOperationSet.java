@@ -73,13 +73,21 @@ public abstract class BasicOperationSet {
         return (ResponseBody) in.readObject();
     }
 
-    public ResponseBody stor(File file) throws IOException, ClassNotFoundException {
-        out.writeObject(new RequestBody(RequestCommand.STOR, file.getName()));
+    public ResponseBody stor(String name) throws IOException, ClassNotFoundException {
+        out.writeObject(new RequestBody(RequestCommand.STOR, name));
         return (ResponseBody) in.readObject();
     }
 
     public ResponseBody retr(String name) throws IOException, ClassNotFoundException {
         out.writeObject(new RequestBody(RequestCommand.RETR, name));
+        return (ResponseBody) in.readObject();
+    }
+
+    /**
+     * Get md5 of file from remote.
+     */
+    public ResponseBody md5(String name) throws IOException, ClassNotFoundException {
+        out.writeObject(new RequestBody(RequestCommand.MD5, name));
         return (ResponseBody) in.readObject();
     }
 

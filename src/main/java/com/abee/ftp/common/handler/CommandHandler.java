@@ -7,8 +7,11 @@ import com.abee.ftp.common.state.ResponseCode;
 import com.abee.ftp.common.tunnel.DataTunnel;
 import com.abee.ftp.common.tunnel.DownloadTunnel;
 import com.abee.ftp.common.tunnel.UploadTunnel;
+import org.apache.commons.codec.digest.DigestUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.Objects;
@@ -48,10 +51,24 @@ public class CommandHandler {
                 break;
             case MKD:
                 response = makeDirectory(request, worker);
+                break;
+            case MD5:
+                response = getMd5(request, worker);
+                break;
             default:
         }
 
         return response;
+    }
+
+    private static ResponseBody getMd5(RequestBody request, ServerCommandListener.Worker worker) {
+        String uri = worker.getDirectory() + "/" + request.getArg();
+        try {
+            String md5Hex = DigestUtils.md5Hex(new FileInputStream(uri));
+            return new ResponseBody(ResponseCode._200, md5Hex);
+        } catch (IOException e) {
+            return new ResponseBody(ResponseCode._200);
+        }
     }
 
     private static ResponseBody makeDirectory(RequestBody request, ServerCommandListener.Worker worker) {

@@ -2,11 +2,9 @@ package com.abee.ftp.client;
 
 import com.abee.ftp.common.state.ResponseBody;
 import com.abee.ftp.common.state.ResponseCode;
+import org.apache.commons.codec.digest.DigestUtils;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.util.Map;
 import java.util.Objects;
 
@@ -30,24 +28,36 @@ public class AdvancedOperationSet extends BasicOperationSet {
                     uploads(f);
                     cwd(pwd);
                 } else {
-                    /**
-                     * Get a passive port from server
-                     */
-                    ResponseBody response = pasv();
-                    /**
-                     * Preparation before real data transfer.
-                     */
-                    stor(f);
-                    /**
-                     * Transfer data.
-                     */
-                    upload(f, response.getPassivePort());
+                    String localMd5 = DigestUtils.md5Hex(new FileInputStream(f));
+
+                    String remoteMd5 = md5(f.getName()).getArg();
+
+                    if (!localMd5.equals(remoteMd5)) {
+                        /**
+                         * Get a passive port from server
+                         */
+                        ResponseBody response = pasv();
+                        /**
+                         * Preparation before real data transfer.
+                         */
+                        stor(f.getName());
+                        /**
+                         * Transfer data.
+                         */
+                        upload(f, response.getPassivePort());
+                    }
                 }
             }
         } else {
-            ResponseBody response = pasv();
-            stor(file);
-            upload(file, response.getPassivePort());
+            String localMd5 = DigestUtils.md5Hex(new FileInputStream(file));
+
+            String remoteMd5 = md5(file.getName()).getArg();
+
+            if (!localMd5.equals(remoteMd5)) {
+                ResponseBody response = pasv();
+                stor(file.getName());
+                upload(file, response.getPassivePort());
+            }
         }
 
         return true;
@@ -71,15 +81,25 @@ public class AdvancedOperationSet extends BasicOperationSet {
                     downloads(subDirectory, remote + "/" + key);
                     cwd(remote);
                 } else {
-                    /**
-                     * Get a passive port from server
-                     */
-                    ResponseBody response = pasv();
-
-                    retr(key);
-
                     File f = new File(file.getPath() + "/" + key);
-                    download(f, response.getPassivePort());
+
+                    String localMd5 = "";
+                    if (f.exists()) {
+                        localMd5 = DigestUtils.md5Hex(new FileInputStream(f));
+                    }
+
+                    String remoteMd5 = md5(key).getArg();
+
+                    if (!localMd5.equals(remoteMd5)) {
+                        /**
+                         * Get a passive port from server
+                         */
+                        ResponseBody response = pasv();
+
+                        retr(key);
+
+                        download(f, response.getPassivePort());
+                    }
                 }
             }
         } else {
@@ -87,12 +107,22 @@ public class AdvancedOperationSet extends BasicOperationSet {
 
             cwd(remote.substring(0, tag));
 
-            ResponseBody response = pasv();
-
-            retr(remote.substring(tag));
-
             File f = new File(file.getPath() + "/" + remote.substring(tag));
-            download(f, response.getPassivePort());
+
+            String localMd5 = "";
+            if (file.exists()) {
+                localMd5 = DigestUtils.md5Hex(new FileInputStream(f));
+            }
+
+            String remoteMd5 = md5(remote.substring(tag)).getArg();
+
+            if (!localMd5.equals(remoteMd5)) {
+                ResponseBody response = pasv();
+
+                retr(remote.substring(tag));
+
+                download(f, response.getPassivePort());
+            }
         }
 
 
