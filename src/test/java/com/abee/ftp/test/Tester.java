@@ -1,9 +1,11 @@
 package com.abee.ftp.test;
 
+import org.apache.commons.codec.digest.DigestUtils;
+
 import java.io.*;
 
 public class Tester {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         for (int i = 0; i < 1; i++) {
             StringBuilder stringBuilder = new StringBuilder();
             for (int j = 0; j < 10000 - i * 10; j++) {

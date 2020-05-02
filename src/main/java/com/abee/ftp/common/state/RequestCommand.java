@@ -49,5 +49,10 @@ public enum RequestCommand {
     /**
      * Generate directory
      */
-    MKD;
+    MKD,
+
+    /**
+     * Get MD5 of file
+     */
+    MD5;
 }
