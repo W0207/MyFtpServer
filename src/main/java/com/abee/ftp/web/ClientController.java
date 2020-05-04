@@ -35,13 +35,13 @@ public class ClientController {
     }
 
     @RequestMapping("upload")
-    public String upload(String local, String remote) {
+    public String upload(String local, String remote, boolean withSecurity) {
         if (client == null) {
             return "You should connect to server first.";
         }
 
         try {
-            client.upload(local, remote);
+            client.upload(local, remote, withSecurity);
         } catch (IOException | ClassNotFoundException e) {
             return "Unknown Error.";
         }
@@ -50,13 +50,13 @@ public class ClientController {
     }
 
     @RequestMapping("download")
-    public String download(String local, String remote) {
+    public String download(String local, String remote, boolean withSecurity) {
         if (client == null) {
             return "You should connect to server first.";
         }
 
         try {
-            client.download(remote, local);
+            client.download(remote, local, withSecurity);
         } catch (IOException | ClassNotFoundException e) {
             return "Unknown Error.";
         }

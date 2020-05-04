@@ -30,25 +30,24 @@ public class MyFtpClient {
      * @param remote should always be a working directory.
      * @return result of uploading.
      */
-    public boolean upload(String local, String remote) throws IOException, ClassNotFoundException {
+    public boolean upload(String local, String remote, boolean withSecurity) throws IOException, ClassNotFoundException {
         File file = new File(local);
 
         operationSet.cwd(remote);
 
-        return operationSet.uploads(file);
+        return operationSet.uploads(file, withSecurity);
     }
 
     /**
      * @param remote directory or uri,
-     *               thus {@link com.abee.ftp.client.BasicOperationSet#downloads(File, String)}
+     *               thus {@link com.abee.ftp.client.BasicOperationSet#downloads(File, String, boolean)}
      *               needs two parameters.
      * @param local should always be a directory.
      * @return result of downloading.
      */
-    public boolean download(String remote, String local) throws IOException, ClassNotFoundException {
+    public boolean download(String remote, String local, boolean withSecurity) throws IOException, ClassNotFoundException {
         File file = new File(local);
 
-        return operationSet.downloads(file, remote);
+        return operationSet.downloads(file, remote, withSecurity);
     }
-
 }

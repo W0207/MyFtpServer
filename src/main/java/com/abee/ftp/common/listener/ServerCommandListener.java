@@ -34,8 +34,8 @@ public class ServerCommandListener extends CommandListener {
         ServerSocket serverSocket = null;
         try {
             serverSocket = new ServerSocket(socketAddress.getPort(), 50, socketAddress.getAddress());
-            System.out.println("FTP Server started. IP: " + socketAddress.getAddress()
-                    + ", Listener Port: " + socketAddress.getPort());
+            System.out.println("FTP Command Listener started. IP: " + socketAddress.getAddress()
+                    + ", Port: " + socketAddress.getPort());
         } catch (IOException e) {
             e.printStackTrace();
             start = false;
