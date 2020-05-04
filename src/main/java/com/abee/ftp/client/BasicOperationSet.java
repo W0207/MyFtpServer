@@ -1,9 +1,12 @@
 package com.abee.ftp.client;
 
+import com.abee.ftp.client.secure.Authenticator;
 import com.abee.ftp.common.state.RequestBody;
 import com.abee.ftp.common.state.RequestCommand;
 import com.abee.ftp.common.state.ResponseBody;
 import com.abee.ftp.common.tool.FileTransferUtil;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
 
 import java.io.*;
 import java.net.Socket;
@@ -83,6 +86,16 @@ public abstract class BasicOperationSet {
         return (ResponseBody) in.readObject();
     }
 
+    public ResponseBody stors(String name) throws IOException, ClassNotFoundException {
+        out.writeObject(new RequestBody(RequestCommand.STORS, name));
+        return (ResponseBody) in.readObject();
+    }
+
+    public ResponseBody retrs(String name) throws IOException, ClassNotFoundException {
+        out.writeObject(new RequestBody(RequestCommand.RETRS, name));
+        return (ResponseBody) in.readObject();
+    }
+
     /**
      * Get md5 of file from remote.
      */
@@ -94,20 +107,28 @@ public abstract class BasicOperationSet {
     /**
      * Upload single file.
      */
-    public ResponseBody upload(File file, int port) throws IOException, ClassNotFoundException {
+    public ResponseBody upload(File file, int port, boolean withSecurity) throws IOException, ClassNotFoundException {
         Socket dataSocket = new Socket("localhost", port);
         OutputStream dataStream = dataSocket.getOutputStream();
-        FileTransferUtil.file2Stream(dataStream, file);
+        if (withSecurity) {
+            FileTransferUtil.secureFile2Stream(dataStream, file, Authenticator.LOCAL_PUBLIC_KEY);
+        } else {
+            FileTransferUtil.file2Stream(dataStream, file);
+        }
         return (ResponseBody) in.readObject();
     }
 
     /**
      * Download single file.
      */
-    public ResponseBody download(File file, int port) throws IOException, ClassNotFoundException {
+    public ResponseBody download(File file, int port, boolean withSecurity) throws IOException, ClassNotFoundException {
         Socket dataSocket = new Socket("localhost", port);
         InputStream dataStream = dataSocket.getInputStream();
-        FileTransferUtil.stream2File(dataStream, file);
+        if (withSecurity) {
+            FileTransferUtil.secureStream2File(dataStream, file, Authenticator.LOCAL_PUBLIC_KEY);
+        } else {
+            FileTransferUtil.stream2File(dataStream, file);
+        }
         return (ResponseBody) in.readObject();
     }
 
@@ -115,16 +136,18 @@ public abstract class BasicOperationSet {
      * Upload all files under {@code file} to server if {@code file.isDirectory()} is true
      * Upload itself if {@code file.isFile()} is true.
      * @param file local directory or common file.
+     * @param withSecurity transfer with security or not.
      * @return whether upload success or fail.
      */
-    public abstract boolean uploads(File file) throws IOException, ClassNotFoundException;
+    public abstract boolean uploads(File file, boolean withSecurity) throws IOException, ClassNotFoundException;
 
     /**
      * Download all files under the file to server if {@code remote} is working directory.
      * Download itself if {@code file.isFile()} is uri.
      * @param file local directory, {@code file.isDirectory()} is always true.
      * @param remote server working directory or uri.
+     * @param withSecurity transfer with security or not.
      * @return whether download success or fail.
      */
-    public abstract boolean downloads(File file, String remote) throws IOException, ClassNotFoundException;
+    public abstract boolean downloads(File file, String remote, boolean withSecurity) throws IOException, ClassNotFoundException;
 }

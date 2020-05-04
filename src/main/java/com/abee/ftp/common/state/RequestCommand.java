@@ -54,5 +54,15 @@ public enum RequestCommand {
     /**
      * Get MD5 of file
      */
-    MD5;
+    MD5,
+
+    /**
+     * Download from server with security.
+     */
+    RETRS,
+
+    /**
+     * Upload to server with security.
+     */
+    STORS;
 }

@@ -2,7 +2,7 @@ package com.abee.ftp;
 
 
 import com.abee.ftp.common.listener.ServerCommandListener;
-import com.abee.ftp.config.ServerContext;
+import com.abee.ftp.secure.AuthorityCenter;
 import com.abee.ftp.server.MyFtpServer;
 
 import java.net.UnknownHostException;
@@ -19,6 +19,9 @@ public class FtpServer {
         server.setCommandListener(serverCommandListener);
 
         server.setRoot("D:/server");
+
+        AuthorityCenter certificateAuthority = new AuthorityCenter("localhost", 2222);
+        server.setAuthorityCenter(certificateAuthority);
 
         server.start();
     }

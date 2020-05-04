@@ -4,14 +4,12 @@ import com.abee.ftp.common.listener.ServerCommandListener;
 import com.abee.ftp.common.state.RequestBody;
 import com.abee.ftp.common.state.ResponseBody;
 import com.abee.ftp.common.state.ResponseCode;
-import com.abee.ftp.common.tunnel.DataTunnel;
-import com.abee.ftp.common.tunnel.DownloadTunnel;
-import com.abee.ftp.common.tunnel.UploadTunnel;
+import com.abee.ftp.common.tunnel.*;
+import com.abee.ftp.secure.KeyStore;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.Objects;
@@ -47,6 +45,8 @@ public class CommandHandler {
                 break;
             case RETR:
             case STOR:
+            case RETRS:
+            case STORS:
                 response = startTransfer(request, worker);
                 break;
             case MKD:
@@ -97,6 +97,17 @@ public class CommandHandler {
             case STOR:
                 tunnel = new UploadTunnel(worker.getDataSocket(), worker.getObjectOut());
                 break;
+            case RETRS:
+                String address = worker.getSocket().getInetAddress().toString();
+                byte[] key = KeyStore.getKeys().get(address);
+                tunnel = new SecureDownloadTunnel(
+                        worker.getDataSocket(), worker.getObjectOut(), key);
+                break;
+            case STORS:
+                address = worker.getSocket().getInetAddress().toString();
+                key = KeyStore.getKeys().get(address);
+                tunnel = new SecureUploadTunnel(
+                        worker.getDataSocket(), worker.getObjectOut(), key);
             default:
         }
 

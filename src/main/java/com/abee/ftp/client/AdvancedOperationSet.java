@@ -18,14 +18,14 @@ public class AdvancedOperationSet extends BasicOperationSet {
     }
 
     @Override
-    public boolean uploads(File file) throws IOException, ClassNotFoundException {
+    public boolean uploads(File file, boolean withSecurity) throws IOException, ClassNotFoundException {
         if (file.isDirectory()) {
             for (File f: Objects.requireNonNull(file.listFiles())) {
                 if (f.isDirectory()) {
                     mkd(f.getName());
                     String pwd = pwd().getArg();
                     cwd(pwd + "/" + f.getName());
-                    uploads(f);
+                    uploads(f, withSecurity);
                     cwd(pwd);
                 } else {
                     String localMd5 = DigestUtils.md5Hex(new FileInputStream(f));
@@ -40,11 +40,15 @@ public class AdvancedOperationSet extends BasicOperationSet {
                         /**
                          * Preparation before real data transfer.
                          */
-                        stor(f.getName());
+                        if (withSecurity) {
+                            stors(f.getName());
+                        } else {
+                            stor(f.getName());
+                        }
                         /**
                          * Transfer data.
                          */
-                        upload(f, response.getPassivePort());
+                        upload(f, response.getPassivePort(), withSecurity);
                     }
                 }
             }
@@ -55,8 +59,12 @@ public class AdvancedOperationSet extends BasicOperationSet {
 
             if (!localMd5.equals(remoteMd5)) {
                 ResponseBody response = pasv();
-                stor(file.getName());
-                upload(file, response.getPassivePort());
+                if (withSecurity) {
+                    stors(file.getName());
+                } else {
+                    stor(file.getName());
+                }
+                upload(file, response.getPassivePort(), withSecurity);
             }
         }
 
@@ -64,7 +72,7 @@ public class AdvancedOperationSet extends BasicOperationSet {
     }
 
     @Override
-    public boolean downloads(File file, String remote) throws IOException, ClassNotFoundException {
+    public boolean downloads(File file, String remote, boolean withSecurity) throws IOException, ClassNotFoundException {
         /**
          * if change working directory operation success
          */
@@ -78,7 +86,7 @@ public class AdvancedOperationSet extends BasicOperationSet {
                 if (files.get(key)) {
                     File subDirectory = new File(file.getPath() + "/" + key);
                     subDirectory.mkdir();
-                    downloads(subDirectory, remote + "/" + key);
+                    downloads(subDirectory, remote + "/" + key, withSecurity);
                     cwd(remote);
                 } else {
                     File f = new File(file.getPath() + "/" + key);
@@ -96,9 +104,13 @@ public class AdvancedOperationSet extends BasicOperationSet {
                          */
                         ResponseBody response = pasv();
 
-                        retr(key);
+                        if (withSecurity) {
+                            retrs(key);
+                        } else {
+                            retr(key);
+                        }
 
-                        download(f, response.getPassivePort());
+                        download(f, response.getPassivePort(), withSecurity);
                     }
                 }
             }
@@ -119,12 +131,15 @@ public class AdvancedOperationSet extends BasicOperationSet {
             if (!localMd5.equals(remoteMd5)) {
                 ResponseBody response = pasv();
 
-                retr(remote.substring(tag));
+                if (withSecurity) {
+                    retrs(remote.substring(tag));
+                } else {
+                    retr(remote.substring(tag));
+                }
 
-                download(f, response.getPassivePort());
+                download(f, response.getPassivePort(), withSecurity);
             }
         }
-
 
         return true;
     }
