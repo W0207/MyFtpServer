@@ -1,6 +1,7 @@
 package com.abee.ftp.web;
 
 import com.abee.ftp.client.MyFtpClient;
+import com.abee.ftp.client.secure.Authenticator;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
@@ -32,6 +33,19 @@ public class ClientController {
         }
 
         return "Connected to server " + ip + ":" + port;
+    }
+
+    @RequestMapping("authenticate")
+    public String authenticate(String ip, int port) {
+        Authenticator authenticator = new Authenticator();
+        authenticator.connect(ip, port);
+
+        String result = "ERROR.";
+        if (authenticator.authenticate()) {
+            result = "OK";
+        }
+
+        return result;
     }
 
     @RequestMapping("upload")
