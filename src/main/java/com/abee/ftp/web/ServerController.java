@@ -2,6 +2,7 @@ package com.abee.ftp.web;
 
 import com.abee.ftp.common.listener.ServerCommandListener;
 import com.abee.ftp.config.ServerContext;
+import com.abee.ftp.secure.AuthorityCenter;
 import com.abee.ftp.server.MyFtpServer;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,12 +24,15 @@ public class ServerController {
     }
 
     @RequestMapping("start")
-    public String start(String ip, Integer port, String root) {
+    public String start(String ip, Integer lPort, Integer sPort, String root) {
         MyFtpServer server = new MyFtpServer();
 
         try {
-            ServerCommandListener serverCommandListener = new ServerCommandListener(ip, port);
+            ServerCommandListener serverCommandListener = new ServerCommandListener(ip, lPort);
             server.setCommandListener(serverCommandListener);
+
+            AuthorityCenter certificateAuthority = new AuthorityCenter(ip, sPort);
+            server.setAuthorityCenter(certificateAuthority);
         } catch (UnknownHostException e) {
             return "Server start failed.";
         }
@@ -39,6 +43,6 @@ public class ServerController {
             return "Root '" + root + "' not exist.";
         }
 
-        return "Server started " + ip + ":" + port;
+        return "Server started " + ip;
     }
 }
