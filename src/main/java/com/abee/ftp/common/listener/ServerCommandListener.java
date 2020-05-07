@@ -4,6 +4,7 @@ import com.abee.ftp.common.handler.CommandHandler;
 import com.abee.ftp.common.state.RequestBody;
 import com.abee.ftp.common.state.ResponseBody;
 import com.abee.ftp.config.ServerContext;
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -15,10 +16,9 @@ import java.net.UnknownHostException;
  */
 public class ServerCommandListener extends CommandListener {
 
-    public boolean start = true;
-
     public ServerCommandListener(String hostname, int port) throws UnknownHostException {
         super.init(hostname, port);
+
     }
 
     @Override
@@ -30,6 +30,7 @@ public class ServerCommandListener extends CommandListener {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
 
         ServerSocket serverSocket = null;
         try {

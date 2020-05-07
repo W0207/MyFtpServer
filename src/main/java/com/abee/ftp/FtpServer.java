@@ -18,7 +18,7 @@ public class FtpServer {
         ServerCommandListener serverCommandListener = new ServerCommandListener("localhost", 2221);
         server.setCommandListener(serverCommandListener);
 
-        server.setRoot("D:/server");
+        server.setRoot("D:/OTHER/server");
 
         AuthorityCenter certificateAuthority = new AuthorityCenter("localhost", 2222);
         server.setAuthorityCenter(certificateAuthority);
