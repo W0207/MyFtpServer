@@ -34,4 +34,30 @@ public class MyFtpServer {
     public void setAuthorityCenter(AuthorityCenter c) {
         this.authorityCenter = c;
     }
+
+    @Override
+    public int hashCode() {
+        return (commandListener.getSocketAddress().toString() + authorityCenter.toString()).hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return this.hashCode() == obj.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "Listener: " + commandListener.getSocketAddress().toString() +
+                ", Authority Center: " + authorityCenter.toString();
+    }
+
+    public void close() {
+        if (commandListener != null) {
+            commandListener.close();
+        }
+
+        if (authorityCenter != null) {
+            authorityCenter.close();
+        }
+    }
 }

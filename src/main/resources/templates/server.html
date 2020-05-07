@@ -5,6 +5,25 @@
     <title>MyFtpServer</title>
 </head>
 <body>
-
+<form method="get" action="/server/start" enctype="multipart/form-data">
+    服务器IP<input type="text" name="ip"><br>
+    服务器根路径<input type="text" name="root"><br>
+    监听端口<input type="number" name="lPort"><br>
+    认证端口<input type="text" name="sPort"><br>
+    <input type="submit" value="连接"><br>
+</form>
+<br>
+<br>
+<form method="get" action="/server/shutdown" enctype="multipart/form-data">
+    服务器IP<input type="text" name="ip"><br>
+    监听端口<input type="number" name="lPort"><br>
+    认证端口<input type="text" name="sPort"><br>
+    <input type="submit" value="关闭"><br>
+</form>
+<br>
+<br>
+<form method="get" action="/server/servers" enctype="multipart/form-data">
+    <input type="submit" value="服务器集群"><br>
+</form>
 </body>
 </html>

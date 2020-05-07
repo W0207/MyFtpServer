@@ -42,6 +42,8 @@ public class AuthorityCenter extends Thread {
 
     private int port;
 
+    private boolean start = true;
+
     public AuthorityCenter(String ip, int port) {
         this.ip = ip;
         this.port = port;
@@ -55,7 +57,7 @@ public class AuthorityCenter extends Thread {
             System.out.println("FTP Authority Center started. IP: " + serverSocket.getInetAddress() +
                     ", Port: " + serverSocket.getLocalPort());
 
-            while (true) {
+            while (start) {
                 Socket socket = serverSocket.accept();
 
                 byte[] result = authorize(socket);
@@ -85,5 +87,14 @@ public class AuthorityCenter extends Thread {
             e.printStackTrace();
             return new byte[DATA_LENGTH];
         }
+    }
+
+    public void close() {
+        start = false;
+    }
+
+    @Override
+    public String toString() {
+        return ip + ":" + port;
     }
 }
