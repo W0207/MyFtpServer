@@ -47,7 +47,7 @@ public class SecureUploadTunnel extends UploadTunnel {
         try {
             File file = new File(uri);
             InputStream in = client.getInputStream();
-            if (FileTransferUtil.secureStream2File(in, file, key)) {
+            if (FileTransferUtil.secureStream2File(in, file, key, false)) {
                 notification.writeObject(new ResponseBody(ResponseCode._226, ResponseCode._226.description));
             } else {
                 notification.writeObject(new ResponseBody(ResponseCode._500, "Transfer failed."));

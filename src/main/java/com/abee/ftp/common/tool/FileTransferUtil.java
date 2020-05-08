@@ -1,7 +1,5 @@
 package com.abee.ftp.common.tool;
 
-import com.abee.ftp.common.state.ResponseBody;
-import com.abee.ftp.common.state.ResponseCode;
 import com.abee.ftp.secure.coder.AESCoder;
 
 import java.io.*;
@@ -11,14 +9,15 @@ import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
 import java.util.Arrays;
 import java.util.Random;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
 
 /**
  * @author xincong yao
  */
 public class FileTransferUtil {
+
+    public static final int ENCRYPT_BUFFER_SIZE = 4095;
+
+    public static final int DECRYPT_BUFFER_SIZE = 4096;
 
     public static final int BUFFER_SIZE = 4096;
 
@@ -131,8 +130,13 @@ public class FileTransferUtil {
         return true;
     }
 
-    public static boolean secureFile2Stream(OutputStream out, File file, byte[] key) {
-        byte[] buffer = new byte[BUFFER_SIZE];
+    public static boolean secureFile2Stream(OutputStream out, File file, byte[] key, boolean isEncrypt) {
+        byte[] buffer;
+        if (isEncrypt) {
+            buffer = new byte[ENCRYPT_BUFFER_SIZE];
+        } else {
+            buffer = new byte[DECRYPT_BUFFER_SIZE];
+        }
 
         FileInputStream fis;
         BufferedInputStream bis = null;
@@ -141,11 +145,11 @@ public class FileTransferUtil {
             bis = new BufferedInputStream(fis);
             int len;
             while ((len = bis.read(buffer)) != -1) {
-                if (len < BUFFER_SIZE) {
+                if (len < buffer.length) {
                     buffer = Arrays.copyOf(buffer, len);
                 }
-                buffer = AESCoder.encrypt(buffer, key);
-                out.write(buffer);
+                byte[] message = AESCoder.encrypt(buffer, key);
+                out.write(message);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -170,7 +174,7 @@ public class FileTransferUtil {
         return true;
     }
 
-    public static boolean secureStream2File(InputStream in, File file, byte[] key) {
+    public static boolean secureStream2File(InputStream in, File file, byte[] key, boolean isEncrypt) {
         FileChannel channel = null;
         FileLock lock = null;
         try {
@@ -207,13 +211,19 @@ public class FileTransferUtil {
              * Write bytes from stream to file.
              */
             int len;
-            byte[] buffer = new byte[BUFFER_SIZE];
+            byte[] buffer;
+            if (isEncrypt) {
+                buffer = new byte[ENCRYPT_BUFFER_SIZE];
+            } else {
+                buffer = new byte[DECRYPT_BUFFER_SIZE];
+            }
+
             while ((len = in.read(buffer)) != -1) {
-                if (len < BUFFER_SIZE) {
+                if (len < buffer.length) {
                     buffer = Arrays.copyOf(buffer, len);
                 }
-                buffer = AESCoder.decrypt(buffer, key);
-                channel.write(ByteBuffer.wrap(buffer));
+                byte[] message = AESCoder.decrypt(buffer, key);
+                channel.write(ByteBuffer.wrap(message));
             }
 
         } catch (FileNotFoundException e) {

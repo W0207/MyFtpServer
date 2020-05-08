@@ -111,7 +111,7 @@ public abstract class BasicOperationSet {
         Socket dataSocket = new Socket("localhost", port);
         OutputStream dataStream = dataSocket.getOutputStream();
         if (withSecurity) {
-            FileTransferUtil.secureFile2Stream(dataStream, file, Authenticator.LOCAL_PUBLIC_KEY);
+            FileTransferUtil.secureFile2Stream(dataStream, file, Authenticator.LOCAL_PUBLIC_KEY, true);
         } else {
             FileTransferUtil.file2Stream(dataStream, file);
         }
@@ -125,7 +125,7 @@ public abstract class BasicOperationSet {
         Socket dataSocket = new Socket("localhost", port);
         InputStream dataStream = dataSocket.getInputStream();
         if (withSecurity) {
-            FileTransferUtil.secureStream2File(dataStream, file, Authenticator.LOCAL_PUBLIC_KEY);
+            FileTransferUtil.secureStream2File(dataStream, file, Authenticator.LOCAL_PUBLIC_KEY, false);
         } else {
             FileTransferUtil.stream2File(dataStream, file);
         }

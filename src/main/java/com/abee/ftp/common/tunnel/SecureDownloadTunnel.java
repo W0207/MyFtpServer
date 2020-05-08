@@ -44,7 +44,7 @@ public class SecureDownloadTunnel extends DownloadTunnel {
         try {
             File file = new File(uri);
             OutputStream out = client.getOutputStream();
-            if (FileTransferUtil.secureFile2Stream(out, file, key)) {
+            if (FileTransferUtil.secureFile2Stream(out, file, key, true)) {
                 notification.writeObject(new ResponseBody(ResponseCode._226, ResponseCode._226.description));
             } else {
                 notification.writeObject(new ResponseBody(ResponseCode._500, "Transfer failed."));
