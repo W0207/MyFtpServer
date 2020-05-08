@@ -20,7 +20,7 @@ public class FtpClient {
 
         MyFtpClient client = new MyFtpClient();
         client.connect("localhost", 2221);
-        //client.upload("D:/OTHER/client/root", "D:/OTHER/server/root", true);
-        client.download("D:/OTHER/server/root", "D:/OTHER/client/root", true);
+        client.upload("D:/OTHER/client/root", "D:/OTHER/server/root", true);
+        //client.download("D:/OTHER/server/root", "D:/OTHER/client/root", true);
     }
 }
