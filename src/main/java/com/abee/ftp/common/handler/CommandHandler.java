@@ -64,7 +64,9 @@ public class CommandHandler {
     private static ResponseBody getMd5(RequestBody request, ServerCommandListener.Worker worker) {
         String uri = worker.getDirectory() + "/" + request.getArg();
         try {
-            String md5Hex = DigestUtils.md5Hex(new FileInputStream(uri));
+            FileInputStream fi = new FileInputStream(uri);
+            String md5Hex = DigestUtils.md5Hex(fi);
+            fi.close();
             return new ResponseBody(ResponseCode._200, md5Hex);
         } catch (IOException e) {
             return new ResponseBody(ResponseCode._200);

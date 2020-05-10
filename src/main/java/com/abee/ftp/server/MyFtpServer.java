@@ -60,4 +60,8 @@ public class MyFtpServer {
             authorityCenter.close();
         }
     }
+
+    public String getRoot() {
+        return ServerContext.getRoot();
+    }
 }
