@@ -17,9 +17,9 @@ public class FileTransferUtil {
 
     public static final int ENCRYPT_BUFFER_SIZE = 4095;
 
-    public static final int DECRYPT_BUFFER_SIZE = 4096;
-
     public static final int BUFFER_SIZE = 4096;
+
+    public static final int DECRYPT_BUFFER_SIZE = BUFFER_SIZE;
 
     public static boolean file2Stream(OutputStream out, File file) {
         int len;
@@ -57,10 +57,12 @@ public class FileTransferUtil {
     }
 
     public static boolean stream2File(InputStream in, File file) {
+        FileOutputStream fos = null;
         FileChannel channel = null;
         FileLock lock = null;
         try {
-            channel = new FileOutputStream(file).getChannel();
+            fos = new FileOutputStream(file);
+            channel = fos.getChannel();
 
             /**
              * Try to get file lock every 0 ~ 60ms, it will try 3 times.
@@ -115,6 +117,13 @@ public class FileTransferUtil {
             if (channel != null) {
                 try {
                     channel.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (fos != null) {
+                try {
+                    fos.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

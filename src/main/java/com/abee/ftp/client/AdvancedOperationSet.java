@@ -93,7 +93,9 @@ public class AdvancedOperationSet extends BasicOperationSet {
 
                     String localMd5 = "";
                     if (f.exists()) {
-                        localMd5 = DigestUtils.md5Hex(new FileInputStream(f));
+                        FileInputStream fis = new FileInputStream(f);
+                        localMd5 = DigestUtils.md5Hex(fis);
+                        fis.close();
                     }
 
                     String remoteMd5 = md5(key).getArg();
@@ -123,7 +125,9 @@ public class AdvancedOperationSet extends BasicOperationSet {
 
             String localMd5 = "";
             if (file.exists()) {
-                localMd5 = DigestUtils.md5Hex(new FileInputStream(f));
+                FileInputStream fis = new FileInputStream(file);
+                localMd5 = DigestUtils.md5Hex(fis);
+                fis.close();
             }
 
             String remoteMd5 = md5(remote.substring(tag)).getArg();
