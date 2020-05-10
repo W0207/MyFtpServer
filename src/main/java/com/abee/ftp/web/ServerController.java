@@ -100,4 +100,27 @@ public class ServerController {
         }
         return sb.toString();
     }
+
+    @RequestMapping("root")
+    public String root(String ip, Integer lPort, Integer sPort) {
+        MyFtpServer server = new MyFtpServer();
+
+        try {
+            ServerCommandListener serverCommandListener = new ServerCommandListener(ip, lPort);
+            server.setCommandListener(serverCommandListener);
+
+            AuthorityCenter certificateAuthority = new AuthorityCenter(ip, sPort);
+            server.setAuthorityCenter(certificateAuthority);
+        } catch (UnknownHostException e) {
+            return "UnknownHost:" + ip;
+        }
+
+        for (MyFtpServer ms: servers) {
+            if (server.equals(ms)) {
+                return ms.getRoot();
+            }
+        }
+
+        return "Server not found.";
+    }
 }
