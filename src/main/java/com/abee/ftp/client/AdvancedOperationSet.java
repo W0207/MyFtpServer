@@ -124,8 +124,8 @@ public class AdvancedOperationSet extends BasicOperationSet {
             File f = new File(file.getPath() + "/" + remote.substring(tag));
 
             String localMd5 = "";
-            if (file.exists()) {
-                FileInputStream fis = new FileInputStream(file);
+            if (f.exists()) {
+                FileInputStream fis = new FileInputStream(f);
                 localMd5 = DigestUtils.md5Hex(fis);
                 fis.close();
             }
