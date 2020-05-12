@@ -5,6 +5,7 @@ import com.abee.ftp.common.state.RequestBody;
 import com.abee.ftp.common.state.ResponseBody;
 import com.abee.ftp.common.state.ResponseCode;
 import com.abee.ftp.common.tunnel.*;
+import com.abee.ftp.config.ServerContext;
 import com.abee.ftp.secure.KeyStore;
 import org.apache.commons.codec.digest.DigestUtils;
 
@@ -195,6 +196,11 @@ public class CommandHandler {
 
     private static ResponseBody changeWorkDirectory(RequestBody request, ServerCommandListener.Worker worker) {
         ResponseBody response;
+
+        if (request.getArg().length() < ServerContext.getRoot().length() ||
+                !request.getArg().substring(0, ServerContext.getRoot().length()).equals(ServerContext.getRoot())) {
+            return new ResponseBody(ResponseCode._500, "Don't get smart with me, you don't have the equipment.");
+        }
 
         File file = new File(request.getArg());
         if (file.isDirectory()) {
